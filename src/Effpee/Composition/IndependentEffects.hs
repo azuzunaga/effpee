@@ -74,7 +74,7 @@ mkDay _ = Nothing
 -- TODO Exercise: implement mkDate
 -- Hints: look at the type of (<*>) and pure
 mkDate :: (Int, Int, Int) -> Maybe Date
-mkDate (y, m, d) = error "TODO: implement using <*>"
+mkDate (y, m, d) = pure MkDate <*> mkYear y <*> mkMonth m <*> mkDay d
 
 getFixture0Date :: Maybe Date
 getFixture0Date = mkDate fixture0

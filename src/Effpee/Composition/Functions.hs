@@ -1,11 +1,12 @@
 module Effpee.Composition.Functions where
 
+import Control.Category
 import Data.Int
 import GHC.Num
 
-after :: (b -> c)
-      -> (a -> b)
-      -> (a -> c)
+after :: (b -> c) -- ^ a function, say g
+      -> (a -> b) -- ^ a function, say f
+      -> (a -> c) -- ^ new composed function g . f
 after g f = \a -> g (f a)
 
 double :: Int -> Int
@@ -34,16 +35,14 @@ before = flip after
 -- >>> foo' 3
 -- 7
 foo' :: Int -> Int
-foo' = double `before` incr
+foo' = double <<< incr
 
 -- >>> bar' 3
 -- 8
 bar' :: Int -> Int
-bar' = incr `before` double
+bar' = incr >>> double
 
 -- TODO: Exercise - import Control.Category at the top of the module
 -- Look at the types of (<<<) and (>>>) and substitute them into the
 -- appropriate foo/foo' and bar/bar' definitions to yield the same
 -- results as `after` and `before`
-
-

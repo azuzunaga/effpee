@@ -90,4 +90,3 @@ converted = convert <$> list
 
 main :: IO ()
 main = mapM_ print converted
-
