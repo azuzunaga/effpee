@@ -11,9 +11,23 @@ module Effpee.Transforms.Story where
 
 import Data.Functor (Functor (..))
 import Data.Int
-import Data.List (filter)
+import Data.List (filter, concat)
 import Data.Maybe
-import Data.Text (Text, words, dropAround, toLower)
+import Data.Text (
+  Text
+  , words
+  , dropAround
+  , toLower
+  , split
+  , count
+  , filter
+  , replace
+  , head
+  , tail
+  , replicate
+  , cons
+  , length
+  )
 import Data.UUID hiding (toString)
 import Effpee
 import Effpee.ADT (Boolean)
@@ -196,7 +210,7 @@ defaultEmbedCapabilities
 -- >>> countWords "hello world!\nHow are you doing today?"
 -- 7
 countWords :: Text -> Int
-countWords = length <<< words
+countWords = Effpee.length <<< words
 
 
 -- >>> let marquee = Marquee "This is my beautiful marquee"
@@ -209,7 +223,7 @@ modernizeHTML (Div elems) = Div $ (modernizeHTML <$> elems)
 modernizeHTML element     = element
 
 
--- >>> let textBody = "Donald Trump’s trade war with China is piling up quite a ..."
+-- >>> let textBody = "Donald Trump's trade war with China is piling up quite a ..."
 -- >>> countOcc "Trump" textBody
 -- 1
 -- >>> countOcc "Carrots" "I love carrots, but hate spinach."
@@ -222,18 +236,19 @@ modernizeHTML element     = element
 -- Note: there is a function called =replace= from the Data.Text module that might be useful.
 countOcc :: Text -> Text -> Int
 -- countOcc = todo "Effpee.Transforms.Story.countOcc"
-countOcc word text = length $ filter (== toLower word) $ words $ toLower $ dropAround punctuation text
-   where punctuation c = c == '.' || c == ','
+-- countOcc word text = length $ filter (== toLower word) $ split separators $ toLower $ text
+--    where separators c = c == ',' || c == '.' || c == ' ' || c == '\''
+countOcc word text = count (toLower word) (toLower text)
 
 
 -- TODO: Exercise
 -- >>> redact "Trump" textBody
--- Donald T####’s trade war with China is piling up quite a ...
+-- Donald T####'s trade war with China is piling up quite a ...
 redact :: Text -> Text -> Text
-redact = todo "Effpee.Transforms.Story.redact"
--- redact "" = id
--- redact word = _
+redact word texts = replace word (redacted) texts
+    where redacted = cons (head word) (replicate (Data.Text.length $ tail word) "#")
 
+-- Data.Text.concat (Data.List.concat (Data.List.transpose [noSeparators, Data.Text.transpose [separators]]))
 
 -- TODO: Exercise
 -- >>> expandWidget (URL "https://www.youtube.com/watch?v=rbE53XUtVw0")
