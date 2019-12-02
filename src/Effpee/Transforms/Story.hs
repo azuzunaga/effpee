@@ -248,7 +248,10 @@ redact :: Text -> Text -> Text
 redact word texts = replace word (redacted) texts
     where redacted = cons (head word) (replicate (Data.Text.length $ tail word) "#")
 
+-- Previous attempts
 -- Data.Text.concat (Data.List.concat (Data.List.transpose [noSeparators, Data.Text.transpose [separators]]))
+
+
 
 -- TODO: Exercise
 -- >>> expandWidget (URL "https://www.youtube.com/watch?v=rbE53XUtVw0")
