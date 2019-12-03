@@ -245,7 +245,7 @@ countOcc word text = count (toLower word) (toLower text)
 -- >>> redact "Trump" textBody
 -- Donald T####'s trade war with China is piling up quite a ...
 redact :: Text -> Text -> Text
-redact word texts = replace word (redacted) texts
+redact word = replace word redacted
     where redacted = cons (head word) (replicate (Data.Text.length $ tail word) "#")
 
 -- Previous attempts
