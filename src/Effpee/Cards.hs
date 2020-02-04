@@ -16,14 +16,19 @@ data Color
 data Suit
   -- | Clubs
   = Clubs
-  -- | Diamonds
+  | Diamonds
+  | Hearts
+  | Spades
   -- TODO: flesh out the rest of this "enum" type (also called "sum" types)
   deriving (Generic, Show)
 
 -- | Takes a value of `Suit` and produces the corresponding `Color`.
 -- TODO: implement this function
 evalColor :: Suit -> Color
-evalColor = todo "Effpee.Cards.evalColor"
+evalColor Diamonds = Red
+evalColor Hearts   = Red
+evalColor Clubs    = Black
+evalColor Spades   = Black
 
 -- | Represents the rank of a card in a deck. The rank would be numeric or picture on
 -- the card independent of suit or color.
