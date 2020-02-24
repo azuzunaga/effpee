@@ -1,13 +1,13 @@
 module Effpee.Cards where
 
 import Control.Monad (Monad)
+import Data.Foldable (foldr)
 import Effpee
+import GHC.Num
 
 -- | An example of an "enum" type or simple "sum" type representing color of a suit
 data Color
-  -- | Red
   = Red
-  -- | Black
   | Black
   deriving (Generic, Show, Eq)
 
@@ -20,10 +20,10 @@ data Suit
   | Hearts
   | Spades
   -- TODO: flesh out the rest of this "enum" type (also called "sum" types)
-  deriving (Generic, Show)
+  deriving (Generic, Show, Enum)
 
 -- | Takes a value of `Suit` and produces the corresponding `Color`.
--- TODO: implement this function
+-- DONE: implement this function
 evalColor :: Suit -> Color
 evalColor Diamonds = Red
 evalColor Hearts   = Red
@@ -32,7 +32,7 @@ evalColor Spades   = Black
 
 -- | Represents the rank of a card in a deck. The rank would be numeric or picture on
 -- the card independent of suit or color.
--- TODO: Decide how you want to model this data as there are multiple encodings that
+-- DONE: Decide how you want to model this data as there are multiple encodings that
 -- equivalent and have different trade-offs depending how you need to use this data.
 -- There is no /one perfect way/ to encode this without the additional context of usage.
 data Rank
@@ -40,21 +40,25 @@ data Rank
   | King
   | Queen
   | Jack
-  -- TODO: decide if the following data constructor will always yield valid cards in a
-  -- typical deck of cards? What happens if a caller passes negative integers as the
-  -- argument? How about larger values? There are many choices to be made here, write
-  -- some notes of your internal thought process to discuss together next week.
-  | Numeric Int
-  deriving (Generic, Show)
+  | Ten
+  | Nine
+  | Eight
+  | Seven
+  | Six
+  | Five
+  | Four
+  | Three
+  | Two
+  deriving (Generic, Show, Enum)
 
 -- | Represents the card composed of the rank and suit.
--- TODO: Fill in the blanks
+-- DONE: Fill in the blanks
 data Card
   = MkCard
-    -- TODO: Uncomment the front of the following three lines and then fill in the types
-    -- { suit :: _ -- ^ <- fill in the type here
-    -- , rank :: _ -- ^ <- fill in the type here
-    -- }
+    -- DONE: Uncomment the front of the following three lines and then fill in the types
+    { cardSuit :: Suit -- ^ <- fill in the type here
+    , cardRank :: Rank -- ^ <- fill in the type here
+    }
     deriving (Generic, Show)
 
 -- NOTES: sometime we don't need to define a new enum, sum of products or product type.
@@ -84,7 +88,7 @@ type Hand = [Card]
 -- a deck of cards as such a recursive structure representing the "head" of the deck.
 data CardDeck
   = CardDeckEnd Card
-  | CardDeckNext CardDeck
+  | CardDeckNext Card CardDeck
   deriving (Generic, Show)
 
 -- This is another way to represent a deck of cards by using a newtype wrapper.
@@ -93,18 +97,37 @@ newtype CardDeckWrapper
 
 -- | a function that consumes a `Card` value and produces its score.
 -- We will assume for this exercise that Ace produces 13.
+score :: Rank -> Int
+score Ace   = 14
+score King  = 13
+score Queen = 12
+score Jack  = 11
+score Ten   = 10
+score Nine  = 9
+score Eight = 8
+score Seven = 7
+score Six   = 6
+score Five  = 5
+score Four  = 4
+score Three = 3
+score Two   = 2
+
 scoreCard :: Card -> Int
-scoreCard = todo "Effpee.Cards.scoreCard"
+scoreCard (MkCard _ rank) = score rank
 
 -- | a function that, when given a `Hand`, will sum up the scores of each `Card` in
 -- the `Hand``.
 scoreHand :: Hand -> Int
-scoreHand = todo "Effpee.Cards.scoreCard"
+scoreHand = foldr ((+) <<< scoreCard) 0
+
+countCards :: CardDeck -> Int
+countCards (CardDeckEnd _)       = 1
+countCards (CardDeckNext _ deck) = 1 + countCards deck
 
 -- | a function that checks whether the deck of cards is complete in count.
 -- i.e. it checks that there is exactly 52 cards in the deck given.
 cardDeckFull :: CardDeck -> Bool
-cardDeckFull = todo "Effpee.Cards.cardDeckFull"
+cardDeckFull deck = countCards deck == 52
 
 -- | a function that checks whether the deck of cards has 52 unique cards such that
 -- only cards from one deck of cards is present (i.e. we haven't mixed up cards from

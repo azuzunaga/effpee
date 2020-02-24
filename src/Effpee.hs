@@ -16,6 +16,7 @@ module Effpee
   , (>>>)
   , id
   , Eq (..)
+  , Enum (..)
   , TextShow (..)
   , fromString
   , length
@@ -33,6 +34,7 @@ import Data.Monoid         (mconcat)
 import Data.Ord            ((<))
 import Data.String         (String)
 import Data.Text           (Text, unpack)
+import GHC.Enum            (Enum (..))
 import GHC.Err             (error)
 import GHC.Generics        (Generic)
 import GHC.Num             (Integer, Num (..))
