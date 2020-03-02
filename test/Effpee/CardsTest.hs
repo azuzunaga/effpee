@@ -1,4 +1,5 @@
 module Effpee.CardsTest (suite) where
+import           Data.Ord
 import           Effpee
 import           Effpee.Test
 import           GHC.Enum       (enumFrom)
@@ -26,6 +27,7 @@ suite
     -- TODO: same as above but for scoreHand
     -- , testProperty "The score for a hand of 7 cards should not go over 98" propScoreHandDoesntExceedValue
     , testCase "scoreHand [(MkCard Spades Two), (MkCard Clubs Ten)] == 12" $ 12 @=? scoreHand [MkCard Spades Two, MkCard Clubs Ten]
+    , testProperty "The score for a hand of 7 cards should not go over 98" propScoreHand
 
     -- cardDeckFull tests
     , testCase "cardDeckFull (CardDeckNext (MkCard Spades Two) $ CardDeckNext (MkCard Spades Two) $ CardDeckEnd (MkCard Spades Two)) == False" $ False @=? cardDeckFull (CardDeckNext (MkCard Spades Two) <<< CardDeckNext (MkCard Spades Two) $ CardDeckEnd (MkCard Spades Two))
@@ -48,6 +50,12 @@ genCard = MkCard <$> genSuit <*> genRank
 --   rank <- genRank
 --   pure (MkCard suit rank)
 
+genHand :: MonadGen m => m Hand
+genHand = Gen.list (Range.constant 1 7) genCard
+
+propScoreHand = property $ do
+  hand <- forAll genHand
+  scoreHand hand `compare` 99 === LT
 
 propScoreCardIgnoresSuit = property $ do
   rank <- forAll genRank

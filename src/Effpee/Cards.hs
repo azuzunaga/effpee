@@ -2,6 +2,7 @@ module Effpee.Cards where
 
 import Control.Monad (Monad)
 import Data.Foldable (foldr)
+import Data.List     (nub)
 import Effpee
 import GHC.Num
 
@@ -9,7 +10,7 @@ import GHC.Num
 data Color
   = Red
   | Black
-  deriving (Generic, Show, Eq)
+  deriving (Generic, Show, Eq, Bounded)
 
 -- | Represents the suits in a deck of cards
 -- This should include: clubs, diamonds, hearts, spades
@@ -20,7 +21,7 @@ data Suit
   | Hearts
   | Spades
   -- TODO: flesh out the rest of this "enum" type (also called "sum" types)
-  deriving (Generic, Show, Enum)
+  deriving (Generic, Show, Enum, Eq, Bounded)
 
 -- | Takes a value of `Suit` and produces the corresponding `Color`.
 -- DONE: implement this function
@@ -49,7 +50,7 @@ data Rank
   | Four
   | Three
   | Two
-  deriving (Generic, Show, Enum)
+  deriving (Generic, Show, Enum, Eq, Bounded)
 
 -- | Represents the card composed of the rank and suit.
 -- DONE: Fill in the blanks
@@ -59,7 +60,7 @@ data Card
     { cardSuit :: Suit -- ^ <- fill in the type here
     , cardRank :: Rank -- ^ <- fill in the type here
     }
-    deriving (Generic, Show)
+    deriving (Generic, Show, Eq, Bounded)
 
 -- NOTES: sometime we don't need to define a new enum, sum of products or product type.
 -- We might just need to alias or wrap an existing type. Aliasing a type merely gives
@@ -132,8 +133,19 @@ cardDeckFull deck = countCards deck == 52
 -- | a function that checks whether the deck of cards has 52 unique cards such that
 -- only cards from one deck of cards is present (i.e. we haven't mixed up cards from
 -- two decks).
+
+-- cardDeckValid (CardDeckNext (MkCard Spades Ace) (CardDeckEnd (MkCard Diamonds Ace)))
+
 cardDeckValid :: CardDeck -> Bool
-cardDeckValid = todo "Effpee.Cards.cardDeckValid"
+cardDeckValid deck = length (nub (go deck [])) == 52
+  where
+    go :: CardDeck -> [Card] -> [Card]
+    go (CardDeckNext card rest) acc = go rest (card : acc)
+    go (CardDeckEnd card) acc       = card : acc
+
+-- `nub` removes duplicates, `go deck []` transforms a deck to a list (nub's
+-- input). If the deck is still 52 cards after all duplicates have been removed
+-- it means we have a valid deck.
 
 -- TODO: Spotter needs to define and introduce the Random effect in the Effpee.Random
 -- module first before we tackle this. Ignore for the first week.
