@@ -32,7 +32,6 @@ suite
     -- cardDeckFull tests
     , testCase "cardDeckFull (CardDeckNext (MkCard Spades Two) $ CardDeckNext (MkCard Spades Two) $ CardDeckEnd (MkCard Spades Two)) == False" $ False @=? cardDeckFull (CardDeckNext (MkCard Spades Two) <<< CardDeckNext (MkCard Spades Two) $ CardDeckEnd (MkCard Spades Two))
     -- TODO: same as above but for cardDeckFull
-    , testProperty "Suit or rank should not factor into cardDeckFull result" propCardDeckFullIgnoresSuitsAndRank
 
     -- cardDeckValid tests
     ]
@@ -63,16 +62,5 @@ propScoreCardIgnoresSuit = property $ do
   suit1 <- forAll genSuit
   scoreCard (MkCard suit0 rank) === scoreCard (MkCard suit1 rank)
 
-genCardDeck :: MonadGen m => m CardDeck
-genCardDeck =
-  Gen.sized <<< 8 Gen.recursive Gen.choice [
-      -- non-recursive generators
-      CardDeckEnd <$> genCard
-    ] [
-      -- recursive generators
-      Gen.subtermM genCardDeck (\deck -> CardDeckNext <$> genCard <*> pure deck)
-    ]
-
-propCardDeckFullIgnoresSuitsAndRank = property $ do
-  deck <- forAll genCardDeck
-  cardDeckFull deck === False
+genValidDeck :: MonadGen m -> m CardDeck
+genValidDeck = pure fullDeck

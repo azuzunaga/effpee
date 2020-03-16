@@ -87,14 +87,26 @@ type Hand = [Card]
 
 -- NOTES: We sometimes have a need to define recursive structures. We could represent
 -- a deck of cards as such a recursive structure representing the "head" of the deck.
-data CardDeck
-  = CardDeckEnd Card
-  | CardDeckNext Card CardDeck
-  deriving (Generic, Show)
+-- data CardDeck
+--   = CardDeckEnd Card
+--   | CardDeckNext Card CardDeck
+--   deriving (Generic, Show)
 
 -- This is another way to represent a deck of cards by using a newtype wrapper.
-newtype CardDeckWrapper
-  = MkCardDeck { unDeck :: [Card] }
+newtype CardDeck
+  = MkCardDeck        -- data constructor
+  { unDeck :: [Card]  -- generates helper function called unDeck
+  } deriving (Show)
+
+-- Smart constructors
+fullDeck :: CardDeck
+fullDeck = [MkCard s r | s <- suits, r <- ranks]
+
+ranks :: [rank]
+ranks = enumFrom minBound
+
+suits :: [suit]
+suits = enumFrom minBound
 
 -- | a function that consumes a `Card` value and produces its score.
 -- We will assume for this exercise that Ace produces 13.
@@ -121,31 +133,16 @@ scoreCard (MkCard _ rank) = score rank
 scoreHand :: Hand -> Int
 scoreHand = foldr ((+) <<< scoreCard) 0
 
-countCards :: CardDeck -> Int
-countCards (CardDeckEnd _)       = 1
-countCards (CardDeckNext _ deck) = 1 + countCards deck
-
 -- | a function that checks whether the deck of cards is complete in count.
 -- i.e. it checks that there is exactly 52 cards in the deck given.
 cardDeckFull :: CardDeck -> Bool
-cardDeckFull deck = countCards deck == 52
+cardDeckFull deck = length deck == 52
 
 -- | a function that checks whether the deck of cards has 52 unique cards such that
 -- only cards from one deck of cards is present (i.e. we haven't mixed up cards from
 -- two decks).
-
--- cardDeckValid (CardDeckNext (MkCard Spades Ace) (CardDeckEnd (MkCard Diamonds Ace)))
-
 cardDeckValid :: CardDeck -> Bool
-cardDeckValid deck = length (nub (go deck [])) == 52
-  where
-    go :: CardDeck -> [Card] -> [Card]
-    go (CardDeckNext card rest) acc = go rest (card : acc)
-    go (CardDeckEnd card) acc       = card : acc
-
--- `nub` removes duplicates, `go deck []` transforms a deck to a list (nub's
--- input). If the deck is still 52 cards after all duplicates have been removed
--- it means we have a valid deck.
+cardDeckValid deck = length (nub deck) == 52
 
 -- TODO: Spotter needs to define and introduce the Random effect in the Effpee.Random
 -- module first before we tackle this. Ignore for the first week.
