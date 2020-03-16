@@ -1,4 +1,5 @@
 module Effpee.CardsTest (suite) where
+import           Data.List      (concat)
 import           Data.Ord
 import           Effpee
 import           Effpee.Test
@@ -30,10 +31,11 @@ suite
     , testProperty "The score for a hand of 7 cards should not go over 98" propScoreHand
 
     -- cardDeckFull tests
-    , testCase "cardDeckFull (CardDeckNext (MkCard Spades Two) $ CardDeckNext (MkCard Spades Two) $ CardDeckEnd (MkCard Spades Two)) == False" $ False @=? cardDeckFull (CardDeckNext (MkCard Spades Two) <<< CardDeckNext (MkCard Spades Two) $ CardDeckEnd (MkCard Spades Two))
-    -- TODO: same as above but for cardDeckFull
+    -- , testCase "cardDeckFull (CardDeckNext (MkCard Spades Two) $ CardDeckNext (MkCard Spades Two) $ CardDeckEnd (MkCard Spades Two)) == False" $ False @=? cardDeckFull (CardDeckNext (MkCard Spades Two) <<< CardDeckNext (MkCard Spades Two) $ CardDeckEnd (MkCard Spades Two))
+    , testProperty "Correctly identifies full decks" propValidatesFullDeck
 
     -- cardDeckValid tests
+    , testProperty "Correctly identifies valid decks" propValidatesValidDeck
     ]
 
 genSuit :: MonadGen m => m Suit
@@ -62,5 +64,29 @@ propScoreCardIgnoresSuit = property $ do
   suit1 <- forAll genSuit
   scoreCard (MkCard suit0 rank) === scoreCard (MkCard suit1 rank)
 
-genValidDeck :: MonadGen m -> m CardDeck
+genFullDeck :: MonadGen m => m CardDeck
+genFullDeck = MkCardDeck <$> Gen.list (Range.constant 52 52) genCard
+-- genFullDeck = pure fullDeck
+
+genNotFullDeck :: MonadGen m => m CardDeck
+genNotFullDeck = MkCardDeck <$> Gen.list (Range.constant 5 5) genCard
+
+propValidatesFullDeck = property $ do
+  deck <- forAll genFullDeck
+  invalidDeck <- forAll genNotFullDeck
+  cardDeckFull deck === True
+  cardDeckFull invalidDeck === False
+
+genValidDeck :: MonadGen m => m CardDeck
 genValidDeck = pure fullDeck
+
+genInvalidDeck :: MonadGen m => m CardDeck
+genInvalidDeck = pure (MkCardDeck $ concat [ MkCard s r:[MkCard s r] | s <- suits, r <- ranks ])
+
+propValidatesValidDeck = property $ do
+  deck <- forAll genValidDeck
+  invalidDeck <- forAll genFullDeck
+  invalidDeck' <- forAll genInvalidDeck
+  cardDeckValid deck === True
+  cardDeckValid invalidDeck === False
+  cardDeckValid invalidDeck' === False

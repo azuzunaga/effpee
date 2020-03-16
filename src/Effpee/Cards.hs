@@ -93,19 +93,23 @@ type Hand = [Card]
 --   deriving (Generic, Show)
 
 -- This is another way to represent a deck of cards by using a newtype wrapper.
+-- newtype CardDeck
+--   = MkCardDeck        -- data constructor
+--   { unDeck :: [Card]  -- generates helper function called unDeck
+--   } deriving (Show)
 newtype CardDeck
-  = MkCardDeck        -- data constructor
-  { unDeck :: [Card]  -- generates helper function called unDeck
-  } deriving (Show)
+  = MkCardDeck         -- data constructor
+    { unDeck :: [Card] -- generating helper function called unDeck
+    } deriving (Show)
 
--- Smart constructors
+-- smart constructors
 fullDeck :: CardDeck
-fullDeck = [MkCard s r | s <- suits, r <- ranks]
+fullDeck = MkCardDeck [ MkCard s r | s <- suits, r <- ranks ]
 
-ranks :: [rank]
+ranks :: [Rank]
 ranks = enumFrom minBound
 
-suits :: [suit]
+suits :: [Suit]
 suits = enumFrom minBound
 
 -- | a function that consumes a `Card` value and produces its score.
@@ -136,13 +140,13 @@ scoreHand = foldr ((+) <<< scoreCard) 0
 -- | a function that checks whether the deck of cards is complete in count.
 -- i.e. it checks that there is exactly 52 cards in the deck given.
 cardDeckFull :: CardDeck -> Bool
-cardDeckFull deck = length deck == 52
+cardDeckFull deck = length (unDeck deck) == 52
 
 -- | a function that checks whether the deck of cards has 52 unique cards such that
 -- only cards from one deck of cards is present (i.e. we haven't mixed up cards from
 -- two decks).
 cardDeckValid :: CardDeck -> Bool
-cardDeckValid deck = length (nub deck) == 52
+cardDeckValid deck = cardDeckFull deck && length (nub (unDeck deck)) == 52
 
 -- TODO: Spotter needs to define and introduce the Random effect in the Effpee.Random
 -- module first before we tackle this. Ignore for the first week.
